@@ -287,7 +287,7 @@ stateDiagram-v2
 
 ---
 ##### GEN_NEW_TRAJ
-规划初始路线
+刚启动时和急停之后，规划初始路线
 ```cpp
     case GEN_NEW_TRAJ:
     {
@@ -325,7 +325,9 @@ stateDiagram-v2
 
 cpp标准库中的一个容器，将两个不同类型的数据打包成一个对象，固定只有两个成员变量，固定名称为`first`和`second`。尖括号的作用是 模板 语法，指定pair中元素的类型
 
-再看`callReboundReplan`，发现调用了`planner_manager_->reboundReplan`，且要求传入起点坐标和速度、终点坐标和速度等参数，看起是关键部分
+再看`callReboundReplan`，发现调用了`planner_manager_->reboundReplan`，且要求传入起点坐标和速度、终点坐标和速度等参数，看起是关键部分，共有近200行内容。
+**reboundReplan**
+
 
 ##### REPLAN_TRAJ
 
