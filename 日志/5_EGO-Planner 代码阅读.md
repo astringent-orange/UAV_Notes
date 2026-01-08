@@ -9,7 +9,7 @@ date: 2026-01-05
 ---
 ### 文件结构
 ![[ego 代码文件结构.png]]
-planner为规划器相关，而uav_simulator为在模拟时的仿真环境相关。在planner下可分为以下部分
+planner为规划器相关功能包，而uav_simulator为在模拟时的仿真环境相关功能包。planner下可分为以下部分
 - bspline为优化函数相关
 - path_searching为A* 相关
 - plan_env为建立栅格图和膨胀图
@@ -23,7 +23,82 @@ planner为规划器相关，而uav_simulator为在模拟时的仿真环境相关
 ![[ego-planner代码plan_env结构.png]]
 grid_map.cpp完成了建图功能，程序主体就是地图初始化函数`void GridMap::initMap(ros::NodeHandle &nh)`，程序的其余部分就是initMap中各个发布器、订阅器的回调函数，最后是这些回调函数中使用的功能函数，形成非常清晰的三级结构。
 
-`class grid_map`在`grid_map.h`中被声明，而在`grid_map.cpp`中声明了其`init`函数。以此为例，为了编译方便与再次调用等原因在ROS工程中的一个节点的使用往往遵循以下的情况，首先类的主题写在
+> ROS工程的文件结构有许多使用技巧，可以从此一窥
+
+发现`class grid_map`在`grid_map.h`中被声明，而在`grid_map.cpp`中声明了其`init`函数。首先，为了编译方便与再次调用等原因，在ROS工程中的一个节点的使用往往遵循**分离主义**，具体情况如下。
+- 首先类的主体声明写在.h文件并放置于`ws/src/ros_pkg/include/`下
+```cpp
+//include/grid_map.h内
+class GridMap {
+	public:
+		parameters;
+}
+```
+- 其入口例如`class_name::init`则写为.cpp文件放在`ws/src/ros_pkg/src`下，而在入口函数中会调用的其他函数也写在该.cpp文件中
+```cpp
+//src/gird_map.cpp内
+# include "plan_env/gird_map.h"
+void GridMap::initMap(ros::NodeHandle &nh){
+	node_ = nh;
+}
+```
+- 在项目整体的入口文件c.pp的`main`函数中会调用类的入口
+```cpp
+//在plan.cpp内
+# include <ros/ros.h>
+# include "plan_env/grid_map.h"
+GridMap::Ptr grid_map_test_;
+int main(int argc, char** argv)
+{
+	ros::init(arc, argv, "gridmap_test_node");
+	ros::NodeHandle nh_("~");
+	gird_map_test_->initMap(nh_);
+	ros::spin();
+	return 0;
+}
+```
+- 最后通过`launch`文件启动项目入口cpp文件
+
+其次，关于**类的智能指针**的使用见下文
+
+最后，关于`CMakeList`中需要做出修改，例如plan_env功能包中并没有可以直接运行的文件，而都是作为库文件存在，需要修改该功能包的CMake代码。首先需要将两个cpp文件编译为一个动态链接库.so文件，但此时该文件也只是在`plan_env`的编译目录中
+```Cmake
+add_library( plan_env 
+    src/grid_map.cpp 
+    src/raycast.cpp
+)
+```
+而为了让其他功能包也使用这个库，需要向系统“注册”（通常在上述代码之前）
+```Cmake
+catkin_package(
+  INCLUDE_DIRS include       # 告诉别人：我的头文件在这里（菜单在这里）
+  LIBRARIES plan_env         # 告诉别人：我的二进制库是这个（菜在这里）
+  CATKIN_DEPENDS roscpp ...  # 告诉别人：用我也得装这些依赖
+)
+```
+它告诉 ROS 系统：“我生产了一个叫 plan_env 的库，头文件在 include 文件夹，库文件叫 plan_env。谁想用我，就按这个信息来找。”
+
+而在其他功能包中，如果想要使用`plan_env`库，需要对`CMakeList`进行修改。首先是查找，找到`plan_env`注册的信息，然后将其头文件路径加入到`${catkin_INCLUDE_DIRS}` 变量中，然后把 `libplan_env.so` 的路径加入到 `${catkin_LIBRARIES}` 变量中
+```cmake
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  plan_env    # <--- 关键！去ROS系统里找这个包
+)
+```
+然后是包含头文件
+```cmake
+include_directories(
+  ${catkin_INCLUDE_DIRS} 
+)
+```
+最后是链接库
+```cmake
+add_executable(ego_planner_node src/plan.cpp ...)
+
+target_link_libraries(ego_planner_node
+  ${catkin_LIBRARIES}  # <--- 关键！
+)
+```
 
 
 ---
