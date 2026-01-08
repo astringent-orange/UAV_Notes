@@ -113,8 +113,8 @@ target_link_libraries(ego_planner_node
 
 ---
 ### plan_manage
-#### 初始化
-run in sim.launch逻辑，运行 advanced param.xml（只要看开头与结尾是launch标签，那么xml文件就可以作为launch文件运行；这样写是为了层级化和结构化），运行ego planner节点，运行simulator仿真器。——>关键在于第二步ego planner节点。查看cmake文件可以知道，ego planner节点是由三个文件拼接而成
+run in sim.launch逻辑，运行 advanced param.xml（只要看开头与结尾是launch标签，那么xml文件就可以作为launch文件运行；这样写是为了层级化和结构化），运行ego planner节点，运行simulator仿真器。
+——>关键在于第二步ego planner节点。查看cmake文件可以知道，ego planner节点是由三个文件拼接而成
 ![[ego planner node拼接.png]]
 其中，ego planner node cpp中包含了main函数，为整体入口
 ``` cpp
@@ -138,6 +138,10 @@ int main(int argc, char **argv)
 ```
 在main中，首先初始化了一个节点，然后声明了一个`EGOReplanFSM`类实体（FSM表示finite state machine有限状态机），然后运行其初始化函数。发现该类是一个在自定义库文件`ego_replan_fsm.h`中的类，但是其`init`函数则是在`ego_replan_fsm.cpp`中定义，于是查看`init`的内容。
 发现首先是设定了句柄的参数，其次初始化了一些模组，最后设置了回调函数，于是在去寻找设定的模组与回调，首先是模组。
+其中`visualization_`来自tra_utils包，执行可视化操作，而`planner_manager_`自然来自planner_manager.cpp，句柄nh传递到两个模块中，同时`visualization_`也和句柄传递到`planner_manager_`内，再加上状态机本身，可以看到携带句柄的节点有三个了。
+
+其实`traj_server`是一个单独的.cpp，它的内部也有一个主函数，负责订阅轨迹和时间信息，再发布控制指令。因此，可以说实质上规划功能是两个部分组成的：状态机和轨迹服务器。
+
 ```cpp
     /* initialize main modules */
     visualization_.reset(new PlanningVisualization(nh));
@@ -152,6 +156,8 @@ int main(int argc, char **argv)
     ego_planner::DataDisp data_disp_;
 ```
 听起来很绕，先解析一下语法，理清楚关键字的作用，文件的结构，起作用的顺序，以`planner_manager_`为例。
+
+>ROS工程规范：分离化
 
 首先是扩起来的作用域 `namespace ego_planner`，增加一个变量的作用域，防止变量重名，即如果在不同的作用域下要使用`EGOPlannerManager`类，则需要使用完整名`ego_planner::EGOPlannerManager`，而在`fsm.h`中也使用了同样的作用域，则不必使用完整名。
 其次，和类名同名的函数表示构造函数与析构函数（与python的init函数区分，这里的init函数是一个自己定义的函数）。
@@ -170,8 +176,14 @@ class EGOPlannerManager{
 首先是控制初始化时机，使用指针之后可以控制类成员的初始化时间，例如设计在ros节点句柄nh准备好之后。
 其次是可扩展性，使用指针那么之后只需要更改类中的内容而不必更改变量名。
 
-#### 主循环
-依旧是在`init`函数中开启主循环，
+最终可以梳理得到`EGOReplanFSM::init`函数的作用：① 声明变量，获取参数；② 初始化主模块；③ 设置定时器循环；④ 设置发布者与接收者；
+
+
+---
+#### 主循环-状态机回调execFSMCallback()
+在`init`函数中通过定时器开启主循环
+
+>ROS中的定时器使用
 
 `nh.createTimer`的作用。和之前基础内容中的循环类似，之前是用rate和while中的sleep来控制循环的时间，定时器也是用于循环，但是是一种更安全的循环
 ```cpp
@@ -201,7 +213,8 @@ void EGOReplanFSM::execFSMCallback(const ros::TimerEvent &e)
 其参数内容为固定写法，e包含上一次与这一次回调函数应该和实际发生的时间
 Q：两个timer之间的关系如何？A：回调函数相当于向队列中加入了一个任务，然后由main中的spin逐个取出然后执行；两个timer会共享一个任务队列，同样由spin逐个执行，相当于串行执行。
 
-每一次执行`exec_timer`，会根据当前的状态（一个枚举类型变量）进行切换行为，相当于一个有限状态机。
+
+`execFSMCallback()`是整个规划过程的状态机，每过若干循环发布一次状态；每一次执行`exec_timer`，会根据当前的状态（一个枚举类型变量）进行切换行为，相当于一个有限状态机。
 ```cpp
 switch (fsm_state_)
 {
@@ -223,11 +236,11 @@ switch (fsm_state_)
 }
 ```
 
-#### 感知-建图-规划-优化如何体现
 
 
 
-#### 代码使用问题 
+---
+### 代码相关问题 
 **Eigen库**
 cpp中的线性代数库，使用该库可以完成例如矩阵乘法等运算。其中根据头文件不同，其导入方式也不一致。
 ```cpp
