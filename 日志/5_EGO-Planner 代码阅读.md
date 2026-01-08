@@ -2,12 +2,31 @@
 date: 2026-01-05
 ---
 
+### 前言
+参考[Notebooks/EGO-planner及其v2的学习及代码阅读.md at main · Littlestarluo/Notebooks](https://github.com/Littlestarluo/Notebooks/blob/main/EGO-planner%E5%8F%8A%E5%85%B6v2%E7%9A%84%E5%AD%A6%E4%B9%A0%E5%8F%8A%E4%BB%A3%E7%A0%81%E9%98%85%E8%AF%BB.md)
+
+
+---
 ### 文件结构
 ![[ego 代码文件结构.png]]
-planner为规划器相关，而uav_simulator为在模拟时的仿真环境相关。在planner下，bspline为优化函数相关，pathsearching为A* 相关，plan_env为建图相关，plan_manage为整个项目的入口（其下src中有一个ego_planner_node文件，其中有main函数），traj为轨迹相关代码
+planner为规划器相关，而uav_simulator为在模拟时的仿真环境相关。在planner下可分为以下部分
+- bspline为优化函数相关
+- path_searching为A* 相关
+- plan_env为建立栅格图和膨胀图
+- plan_manage为整个项目的入口（其下src中有一个ego_planner_node文件，其中有main函数）
+- traj为轨迹相关代码
 
 使用plan manage的launch文件中的run in sim启动文件，会调用advanced param.xml文件中的高级参数设置
 
+---
+### 建图 plan_env
+![[ego-planner代码plan_env结构.png]]
+grid_map.cpp完成了建图功能，程序主体就是地图初始化函数`void GridMap::initMap(ros::NodeHandle &nh)`，程序的其余部分就是initMap中各个发布器、订阅器的回调函数，最后是这些回调函数中使用的功能函数，形成非常清晰的三级结构。
+
+`class grid_map`在`grid_map.h`中被声明，而在`grid_map.cpp`中声明了其`init`函数。以此为例，为了编译方便与再次调用等原因在ROS工程中的一个节点的使用往往遵循以下的情况，首先类的主题写在
+
+
+---
 ### 运行逻辑
 #### 初始化
 run in sim.launch逻辑，运行 advanced param.xml（只要看开头与结尾是launch标签，那么xml文件就可以作为launch文件运行；这样写是为了层级化和结构化），运行ego planner节点，运行simulator仿真器。——>关键在于第二步ego planner节点。查看cmake文件可以知道，ego planner节点是由三个文件拼接而成
@@ -66,6 +85,7 @@ class EGOPlannerManager{
 首先是控制初始化时机，使用指针之后可以控制类成员的初始化时间，例如设计在ros节点句柄nh准备好之后。
 其次是可扩展性，使用指针那么之后只需要更改类中的内容而不必更改变量名。
 
+---
 #### 主循环
 依旧是在`init`函数中开启主循环，
 

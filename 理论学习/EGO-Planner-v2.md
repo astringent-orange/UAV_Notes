@@ -1,9 +1,10 @@
 
-《Swarm of micro flying robots in the wild》
+《Swarm of micro flying robots in the wild》2022.5 science robotics
 
+### 前言
+查看github，发现swarm of micro flying robots的仓库叫ego-planner-v2。在ego-swarm的基础上将参数化轨迹的B样条更换为MINCO，并提出更好的无人机硬件结构
 
-查看github，发现swarm of micro flying robots的仓库叫ego-planner-v2
-
+---
 ### 无人机轨迹表示方式 MINCO
 将轨迹分为小段
 TRO是什么会议？Gcoptor
