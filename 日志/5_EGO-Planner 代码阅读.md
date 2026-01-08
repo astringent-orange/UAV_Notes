@@ -4,7 +4,7 @@ date: 2026-01-05
 
 ### 前言
 参考[Notebooks/EGO-planner及其v2的学习及代码阅读.md at main · Littlestarluo/Notebooks](https://github.com/Littlestarluo/Notebooks/blob/main/EGO-planner%E5%8F%8A%E5%85%B6v2%E7%9A%84%E5%AD%A6%E4%B9%A0%E5%8F%8A%E4%BB%A3%E7%A0%81%E9%98%85%E8%AF%BB.md)
-
+整个EGO-Planner的代码内容并不小，想要读懂所有部分耗时很多，在阅读时一定要抓住一个主线，了解到每一部分是在做什么
 
 ---
 ### 文件结构
@@ -99,10 +99,20 @@ target_link_libraries(ego_planner_node
   ${catkin_LIBRARIES}  # <--- 关键！
 )
 ```
+最终，还需要在调用者的`package.xml`中添加声明
+```xml
+<build_depend>plan_env</build_depend>
+<exec_depend>plan_env</exec_depend>
+<!-- 或者直接用 <depend>plan_env</depend> -->
+```
+
+>现在回到该功能包本身的内容上来
+
+
 
 
 ---
-### 运行逻辑
+### plan_manage
 #### 初始化
 run in sim.launch逻辑，运行 advanced param.xml（只要看开头与结尾是launch标签，那么xml文件就可以作为launch文件运行；这样写是为了层级化和结构化），运行ego planner节点，运行simulator仿真器。——>关键在于第二步ego planner节点。查看cmake文件可以知道，ego planner节点是由三个文件拼接而成
 ![[ego planner node拼接.png]]
@@ -160,7 +170,6 @@ class EGOPlannerManager{
 首先是控制初始化时机，使用指针之后可以控制类成员的初始化时间，例如设计在ros节点句柄nh准备好之后。
 其次是可扩展性，使用指针那么之后只需要更改类中的内容而不必更改变量名。
 
----
 #### 主循环
 依旧是在`init`函数中开启主循环，
 
