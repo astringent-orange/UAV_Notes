@@ -220,23 +220,121 @@ switch (fsm_state_)
 {
     case INIT:
         // 初始化状态
+        changeFSMExecState();
         break;
     case WAIT_TARGET:
         // 等待目标
+        changeFSMExecState();
         break;
     case GEN_NEW_TRAJ:
         // 生成新轨迹
-        break;
-    case EXEC_TRAJ:
-        // 执行轨迹
+        changeFSMExecState();
         break;
     case REPLAN_TRAJ:
         // 重新规划轨迹
+        changeFSMExecState();
         break;
+    case EXEC_TRAJ:
+        // 执行轨迹
+        changeFSMExecState();
+        break;
+    case EMERGENCY_STOP:
+	    // 紧急停止
+	    changeFSMExecState();
 }
 ```
 
+前两个状态`INIT`，`WAIT_TARGET`是纯粹的时序状态，单纯根据标识来等待和执行状态切换，而`GEN_NEW_TRAJ`，`REPLAN_TRAJ`和`EXEC_TRAJ`则是具体的规划状态，对应生成、重规划和执行轨迹；
 
+```mermaid
+stateDiagram-v2
+    direction TB
+
+    %% 1. 初始化流程
+    INIT --> WAIT_TARGET
+    WAIT_TARGET --> GEN_NEW_TRAJ
+
+    %% 2. 生成新轨迹（起飞阶段）
+    GEN_NEW_TRAJ --> EXEC_TRAJ
+    GEN_NEW_TRAJ --> GEN_NEW_TRAJ : 自身循环（规划失败重试）
+
+    %% 3. 核心飞行循环
+    EXEC_TRAJ --> REPLAN_TRAJ
+    REPLAN_TRAJ --> EXEC_TRAJ
+    REPLAN_TRAJ --> REPLAN_TRAJ : 自身循环（规划失败重试）
+
+    %% 4. 结束与异常处理
+    EXEC_TRAJ --> WAIT_TARGET
+    EMERGENCY_STOP --> GEN_NEW_TRAJ
+```
+ **关键逻辑解析**
+1. **启动流程**：
+    - INIT -> WAIT_TARGET: 系统启动，等待里程计数据和触发信号。
+    - WAIT_TARGET -> GEN_NEW_TRAJ: 收到目标点，生成第一条轨迹。
+        
+2. **核心飞行循环 (The Loop)**：
+    - **EXEC_TRAJ (执行)**: 这是无人机正常飞行时的状态，不断检查进度。
+    - **重规划判定**:
+        - 如果离起点太近（刚出发）或者离终点太近（快到了），为了防止轨迹抖动或不必要的计算，**不进行重规划**，保持 EXEC_TRAJ。
+        - 如果处于中间段，代码进入 else 分支，状态切换到 REPLAN_TRAJ。
+    - **REPLAN_TRAJ (重规划)**: 在这里调用 planFromCurrentTraj()。如果成功，马上切回 EXEC_TRAJ 继续飞；如果失败，保持在当前状态下一轮继续试。
+        
+3. **异常与结束**：
+    - **结束**: 在 EXEC_TRAJ 中，如果时间超过了轨迹总时长 (duration)，说明到达目的地，切回 WAIT_TARGET 等待下一个指令。
+    - **急停复位**: 如果进入 EMERGENCY_STOP（通常由外部碰撞检测触发），无人机会刹车。只有当速度降到几乎为 0 (< 0.1) 时，才会切回 GEN_NEW_TRAJ 尝试重新生成轨迹恢复飞行。
+
+至此，状态机可以归纳为一个2+3+1的结构，其主体为`EXEC_TRAJ`
+
+---
+##### GEN_NEW_TRAJ
+规划初始路线
+```cpp
+    case GEN_NEW_TRAJ:
+    {
+	  ...
+
+      bool flag_random_poly_init;
+      if (timesOfConsecutiveStateCalls().first == 1)
+        flag_random_poly_init = false;
+      else
+        flag_random_poly_init = true;
+
+      bool success = callReboundReplan(true, flag_random_poly_init);
+      if (success)
+      {
+        changeFSMExecState(EXEC_TRAJ, "FSM");
+        flag_escape_emergency_ = true;
+      }
+      else
+      {
+        changeFSMExecState(GEN_NEW_TRAJ, "FSM");
+      }
+      break;
+    }
+```
+可见其中关键的部分是`timesOfConsecutiveStateCalls`和`callReboundReplan`。首先查看`timesOfConsecutiveStateCalls`
+```cpp
+  std::pair<int, EGOReplanFSM::FSM_EXEC_STATE> EGOReplanFSM::timesOfConsecutiveStateCalls()
+  {
+    return std::pair<int, FSM_EXEC_STATE>(continously_called_times_, exec_state_);
+  }
+```
+发现该函数作用是一次性返回当前状态和在这个状态中循环了多少次
+
+>std::pair的作用
+
+cpp标准库中的一个容器，将两个不同类型的数据打包成一个对象，固定只有两个成员变量，固定名称为`first`和`second`。尖括号的作用是 模板 语法，指定pair中元素的类型
+
+再看`callReboundReplan`，发现调用了`planner_manager_->reboundReplan`，且要求传入起点坐标和速度、终点坐标和速度等参数，看起是关键部分
+
+##### REPLAN_TRAJ
+
+
+##### EXEC_TRAJ
+
+
+---
+#### 副循环-检碰回调checkCollisionCallback()
 
 
 ---
