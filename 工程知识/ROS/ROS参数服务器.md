@@ -3,11 +3,12 @@
 
 而与参数服务器沟通一般共有三种方式
 - launch文件中设置
-- 在代码中读取
+- 在代码中操作
 - 在命令行调试
 
-#### 在launch文件中设置
-##### 写在`<node>`里面
+---
+### 1. 在launch文件中设置
+#### 1.1 写在`<node>`里面
 ```xml
 <launch>
     <!-- 参数夹在 node 标签中间 -->
@@ -26,7 +27,7 @@ ros::NodeHandle nh("~");
 nh.param("fsm/flight_type", ...);
 ```
 
-##### 写在`<node>`外面（全局参数）
+#### 1.2 写在`<node>`外面（全局参数）
 ```xml
 <launch>
     <!-- 参数直接放在 launch 下 -->
@@ -64,4 +65,118 @@ int main(int argc, char** argv) {
 
     init(nh, nh_private); // 把两个都传进去
 }
+```
+
+#### 1.3 加载YAML文件
+批量加载参数字典
+```xml
+<launch>
+    <!-- 加载 YAML 文件内容到参数服务器 -->
+    <rosparam file="$(find my_pkg)/config/params.yaml" command="load"/>
+    
+    <node pkg="my_pkg" type="my_node" name="node1">
+        <!-- 仅在这个节点命名空间下加载参数 -->
+        <rosparam file="$(find my_pkg)/config/private_params.yaml" command="load"/>
+    </node>
+</launch>
+```
+
+---
+### 2. 在代码中操作
+#### 2.1 CPP接口
+在cpp中，主要通过`ros::NodeHandle`来操作
+>注意上文中提到的全局句柄和私有句柄的区别
+##### 2.1.1 获取参数
+**方式一：** `getParam`，先声明变量再获取
+```cpp
+ros::NodeHandle nh;
+double radius;
+// 如果参数存在，返回true并将值赋给radius；否则返回false
+if (nh.getParam("/global_radius", radius)) {
+    ROS_INFO("Got radius: %f", radius);
+} else {
+    ROS_WARN("Failed to get param 'global_radius'");
+}
+```
+**方式二：** `param` 带有默认值
+```cpp
+// 语法: nh.param<类型>("参数名", 变量, 默认值);
+int baud_rate;
+nh.param<int>("baud_rate", baud_rate, 57600);
+```
+
+##### 2.1.2 设置与删除
+```cpp
+nh.setParam("new_param", "hello");
+nh.deleteParam("old_param");
+```
+#### 2.2 Python接口
+##### 2.2.1 获取参数
+```python
+import rospy
+
+# 基础获取
+global_radius = rospy.get_param('/global_radius')
+
+# 带默认值的获取 (推荐)
+# 如果 'baud_rate' 不存在，则返回 9600
+baud = rospy.get_param('baud_rate', 9600)
+
+# 获取私有参数 (在参数名前加 ~)
+private_val = rospy.get_param('~private_param', 'default')
+```
+
+##### 2.2.2 设置参数
+```python
+# 设置
+rospy.set_param('my_string', 'ros is cool')
+
+# 检查是否存在
+if rospy.has_param('my_string'):
+    print("Param exists")
+
+# 删除
+try:
+    rospy.delete_param('my_string')
+except KeyError:
+    print("Param not found")
+```
+
+---
+### 3. 在命令行调试
+- 列出所有参数
+```bash
+rosparam list
+```
+- 获取参数值
+```bash
+rosparam get /background_r
+rosparam get / # 获取所有参数，并以YAML格式展示
+```
+- 设置参数值
+```bash
+rosparam set /background_b 100
+```
+- 删除参数
+```bash
+rosparam delete /background_b
+```
+- 保存/加载YAML
+```bash
+rosparam dump params.yaml # 导出
+rosparam load params.yaml # 导入
+rosparam load params.yaml /my_namespace # 导入到指定的命名空间
+```
+
+---
+### 4. 参数使用例
+例如在launch文件中声明
+```xml
+<param name="loop_rate" value="20" />
+```
+然后在cpp中
+```cpp
+int rate_hz;    // 定义变量
+nh.param("loop_rate", rate_hz, 10);    // 从参数服务器获取参数
+ros::Rate loop_rate(rate_hz);    // 使用参数
 ```
