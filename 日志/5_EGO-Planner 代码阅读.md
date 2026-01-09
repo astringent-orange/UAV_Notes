@@ -108,7 +108,7 @@ target_link_libraries(ego_planner_node
 
 >现在回到该功能包本身的内容上来
 
-
+EGO为了维持一个动态局部地图以及高速的查询，没有使用传统的`octomap`等建图工具，而是自己写了一个建图功能包
 
 
 ---
