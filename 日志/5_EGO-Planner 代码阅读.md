@@ -354,7 +354,18 @@ bool EGOPlannerManager::reboundReplan()
 vector<vector<Eigen::Vector3d>> a_star_pathes;
 a_star_pathes = bspline_optimizer_rebound_->initControlPoints(ctrl_pts, true);
 ```
-查看来自`/planner/bspline_opt/src/bspline_optimzier.cpp`的`bspline_optimizer_rebound::initcontrolpoint`，发现也有近200行内容，大概也是关键代码，阅读后发现是论文中关键部分，{p, v} pairs的具体实现
+查看来自`/planner/bspline_opt/src/bspline_optimzier.cpp`的`bspline_optimizer_rebound::initcontrolpoint`，发现也有近200行内容，大概也是关键代码，阅读后发现是论文中关键部分，{p, v} pairs的具体实现。于是想到，此处只是生成新轨迹的代码，那么下面的`REPLAN_TRAJ`部分是否也有相同的代码呢？查看后发现确实也使用了`reboundReplan`，可见这部分的确是关键代码。
+
+而`initcontrolpoints`也可以拆分为以下几个步骤：
+```cpp
+std::vector<std::vector<Eigen::Vector3d>> BsplineOptimizer::initControlPoints()
+{
+	/*1.找出碰撞的路段*/
+	/*2.生成引导路径A**/
+	/*3.确定受影响的控制点范围*/
+	/*4.生成pv对*/
+}
+```
 
 ##### REPLAN_TRAJ
 
