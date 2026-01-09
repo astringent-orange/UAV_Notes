@@ -348,6 +348,13 @@ bool EGOPlannerManager::reboundReplan()
 }
 ```
 
+然后对`INIT`部分进行分析，这里有一些不理解的地方：1是为什么一开始是用多项式去寻找路径 2是这个多项式路径是如何规划的，是否会考虑障碍物 3是采样点为什么不能直接是控制点 4是何时会启动A* 。
+在阅读代码之后发现，冷启动（策略A）的部分使用`/planner/traj_utils/src/polynomial_traj.cpp`所生成的轨迹都是不考虑障碍物，仅满足起点与终点约束的多项式曲线。这是一个乐观的策略，即EGO假设在许多空旷场景下直接飞过去没问题。那障碍物与A* 在哪里体现？——在整个`INIT`的最后，热启动也结束之后。将多项式轨迹点转换为控制点，此时有如下代码：
+```cpp
+vector<vector<Eigen::Vector3d>> a_star_pathes;
+a_star_pathes = bspline_optimizer_rebound_->initControlPoints(ctrl_pts, true);
+```
+查看来自`/planner/bspline_opt/src/bspline_optimzier.cpp`的`bspline_optimizer_rebound::initcontrolpoint`，发现也有近200行内容，大概也是关键代码
 
 ##### REPLAN_TRAJ
 
