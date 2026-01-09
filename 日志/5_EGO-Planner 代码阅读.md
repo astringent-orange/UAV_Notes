@@ -354,7 +354,7 @@ bool EGOPlannerManager::reboundReplan()
 vector<vector<Eigen::Vector3d>> a_star_pathes;
 a_star_pathes = bspline_optimizer_rebound_->initControlPoints(ctrl_pts, true);
 ```
-查看来自`/planner/bspline_opt/src/bspline_optimzier.cpp`的`bspline_optimizer_rebound::initcontrolpoint`，发现也有近200行内容，大概也是关键代码
+查看来自`/planner/bspline_opt/src/bspline_optimzier.cpp`的`bspline_optimizer_rebound::initcontrolpoint`，发现也有近200行内容，大概也是关键代码，阅读后发现是论文中关键部分，{p, v} pairs的具体实现
 
 ##### REPLAN_TRAJ
 
