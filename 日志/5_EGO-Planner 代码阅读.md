@@ -326,7 +326,27 @@ stateDiagram-v2
 cpp标准库中的一个容器，将两个不同类型的数据打包成一个对象，固定只有两个成员变量，固定名称为`first`和`second`。尖括号的作用是 模板 语法，指定pair中元素的类型
 
 再看`callReboundReplan`，发现调用了`planner_manager_->reboundReplan`，且要求传入起点坐标和速度、终点坐标和速度等参数，看起是关键部分，共有近200行内容。
+
 **reboundReplan**
+首先该函数可以拆分为四部分：准备阶段，生成轨迹，核心优化，时间重分配
+```cpp
+bool EGOPlannerManager::reboundReplan()
+{
+	/*STEP 0: pre-check*/
+	打印日志;
+	检查终点，如果太近就不规划;
+	计算B样条时间步长;
+	/*STEP 1: INIT*/
+	生成一串初始点，作为B样条初值;
+	策略A：从零规划;
+	策略B：基于当前轨迹规划;
+	将串点转换为B样条控制点;
+	/*STEP 2: OPTIMIZE*/
+	进行梯度优化，实现避障;
+	/*STEP 3: REFINEMENT*/
+	检查物理可行性;
+}
+```
 
 
 ##### REPLAN_TRAJ
