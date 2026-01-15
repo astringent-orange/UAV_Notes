@@ -445,6 +445,29 @@ while (Astar_id >= 0 ...) {
 2. 射线检测细化
 有时投影出来的点虽然在A* 路径上，单直接推过去困难并不安全
 ```cpp
+// 从安全点向当前点回溯
+for (double a = length; a >= 0.0; a -= resolution) {
+    occ = grid_map_->getInflateOccupancy(...);
+    if (occ) {
+        // 找到了障碍物表面！
+        // 记录锚点 base_point (即 p)
+        cps_.base_point[j].push_back(...);
+        // 记录斥力方向 direction (即 v)
+        cps_.direction[j].push_back((intersection_point - cps_.points.col(j)).normalized());
+        break;
+    }
+}
+```
+3. 邻居赋值
+对于那些没有找到交点的邻居点（例如在第三步中被扩展进来的点），直接复用最近的有效pv对
+```cpp
+// 向后传播
+for (int j = got_intersection_id + 1; ...)
+    cps_.base_point[j].push_back(cps_.base_point[j-1].back());
+
+// 向前传播
+for (int j = got_intersection_id - 1; ...)
+    ...
 ```
 
 ##### REPLAN_TRAJ
