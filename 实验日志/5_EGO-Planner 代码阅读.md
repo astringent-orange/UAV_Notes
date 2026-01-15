@@ -366,6 +366,86 @@ std::vector<std::vector<Eigen::Vector3d>> BsplineOptimizer::initControlPoints()
 	/*4.生成pv对*/
 }
 ```
+分步解析该函数，首先是第一步，找到碰撞的路径
+```cpp
+// 遍历控制点，从第 order_ (通常是3) 个点开始，到倒数几个点结束
+// 因为 B 样条的头尾是固定的，不需要动
+for (int i = order_; i <= i_end; ++i)
+{
+    // 对每一段控制点连线进行细分检查 (Collision Check)
+    // a 从 1.0 到 0.0，相当于从 init_points.col(i-1) 到 init_points.col(i)
+    for (double a = 1.0; a >= 0.0; a -= step_size)
+    {
+        // 调用 grid_map 检查占据情况
+        occ = grid_map_->getInflateOccupancy(...);
+
+        // 状态机逻辑：
+        // 1. 如果当前是障碍物 (occ)，且上一个点不是 (last_occ=false) -> 进入障碍物 (in_id)
+        if (occ && !last_occ) { ... in_id = i - 1; ... }
+        
+        // 2. 如果当前是自由空间 (!occ)，且上一个点是障碍物 (last_occ=true) -> 离开障碍物 (out_id)
+        else if (!occ && last_occ) { ... out_id = i; ... }
+        
+        // 记录这一段撞墙的区间 [in_id, out_id]
+        if (flag_got_start && flag_got_end) {
+            segment_ids.push_back(std::pair<int, int>(in_id, out_id));
+        }
+    }
+}
+```
+**结果**：segment_ids 存储了所有穿过障碍物的轨迹片段的索引。比如 [(3, 5), (10, 12)] 表示第 3-5 个控制点撞墙了，第 10-12 个控制点也撞墙了。
+
+第二步，用A* 找出不撞墙的路径
+```cpp
+vector<vector<Eigen::Vector3d>> a_star_pathes;
+for (size_t i = 0; i < segment_ids.size(); ++i)
+{
+    // 起点：撞墙片段进入前的点 (in)
+    // 终点：撞墙片段出来后的点 (out)
+    Eigen::Vector3d in(init_points.col(segment_ids[i].first)), out(...);
+    
+    // 运行 A* 搜索
+    if (a_star_->AstarSearch(..., in, out)) {
+        // 保存这条绕过障碍物的安全折线路径
+        a_star_pathes.push_back(a_star_->getPath());
+    }
+}
+```
+
+第三步，确定受影响的点的范围
+```cpp
+// 逻辑：
+// 保证每一段要优化的控制点数量不少于 minimum_points
+// 这样可以保证生成的排斥力足够平滑，不会造成局部突变
+if (num_points < minimum_points) {
+    // 向两边扩展范围，直到达到最小点数，或者碰到轨迹边界
+    final_segment_ids[i].first = ...;
+    final_segment_ids[i].second = ...;
+}
+```
+
+第四步，生成pv对
+1. 首先寻找投影点
+对于每一个需要调整的控制点，设想一个经过该点且垂直于轨迹切线的平面，计算该平面与A* 的交点，这个交点被认为是该控制点应该去的位置
+```cpp
+// 这是一个二分查找或者步进搜索的过程
+while (Astar_id >= 0 ...) {
+    // 计算点积，判断平面是否与 A* 路径的某一段线段相交
+    val = (a_star_pathes[i][Astar_id] - cps_.points.col(j)).dot(ctrl_pts_law);
+    
+    // 如果符号相反 (val * last_val <= 0)，说明相交了
+    if (...) {
+        // 计算具体的交点坐标 (线性插值)
+        intersection_point = ...;
+        got_intersection_id = j; // 标记第 j 个点找到了对应的锚点
+        break;
+    }
+}
+```
+2. 射线检测细化
+有时投影出来的点虽然在A* 路径上，单直接推过去困难并不安全
+```cpp
+```
 
 ##### REPLAN_TRAJ
 
