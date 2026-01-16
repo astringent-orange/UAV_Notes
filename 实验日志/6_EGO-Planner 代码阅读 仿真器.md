@@ -10,6 +10,7 @@
 4. 启动轨迹服务器
      <node pkg="ego_planner" name="traj_server" type="traj_server" output="screen">
      <node pkg="waypoint_generator" name="waypoint_generator" type="waypoint_generator" output="screen">
+设置目标点
 5. 启动仿真器
      <include file="$(find ego_planner)/launch/simulator.xml">
 ```
