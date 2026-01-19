@@ -14,4 +14,19 @@ RL与ML，同样第一步是带有参数的fun：输入ob，经过网络输出�
 如何得到act的评价
 Ver0。直接令评价=一步的reward，这样会造成模型短视，因为act会有后续影响，其次reward是可能有延迟的。
 
-Ver1。将act之后所有reward求和为G（cummulated reward），将G作为评价
+Ver1。将act之后所有reward求和为G（cummulated reward），将G作为评价。但是如果某一个过程非常长，当前动作对于将来的结果影响会变小，故这样的评价也并不完善。
+
+Ver2。在上述求和过程中，对于每一个reward乘以一个衰减因子γ^i-1 。于是又有一个G（discounted cummulated reward）。
+
+Ver3。好或者坏是相对的，例如如果某个过程中得到的reward都是正的，但是有大有小，于是需要做一个标准化。方法1，在所有的G上减去一个b，baseline，让G有正有负。
+
+
+policy gradient
+首先随机初始化模型的所有参数。用actor去与环境互动，得到一长串的{si,ai}，于是计算对应的Ai，然后求得最终的loss，用loss去更新一次model。
+
+这里与监督模型不同的地方在于，收集资料的过程是在循环中的，收集一次资料只能更新一次model，导致RL的训练很慢。->收集资料的actor和训练的actor最好是同一个，这样称为on-policy。也有off-policy，要求模型能知道自己与收集资料的actor之间的不同。
+
+exploration
+前面提到，actor在选择行为时是具有随机性的，这样让模型可以尝试一些从没做过的事情。于是有的方法在训练时会扩大这种随机性。
+
+
