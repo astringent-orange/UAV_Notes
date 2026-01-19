@@ -7,4 +7,11 @@ RL与ML，同样第一步是带有参数的fun：输入ob，经过网络输出�
 
 第二步，定义这个“Loss”。整场游戏（episode）的过程中，有一个total reward
 
-第三步，关于优化。将s与a的交叉序列称为trajectory，而reward是s，a的函数，找出actor的参数以最大化R。注意，a是具有随机性的。且env的运作可能并不是已知的，只是黑盒子。此外，reward函数并不是可学习的，且可能具有随机性。
+第三步，关于优化。将s与a的交叉序列称为trajectory，而reward是s，a的函数，找出actor的参数以最大化R。注意，a是具有随机性的。且env的运作可能并不是已知的，只是黑盒子。此外，reward函数并不是可学习的，且可能具有随机性也是一个黑盒子。
+
+如何控制actor。当做出一个act后，会得到一个reward，通过reward来判断是否应该做该act。更准确来说，使用reward来得到对于该act的评价
+
+如何得到act的评价
+Ver0。直接令评价=一步的reward，这样会造成模型短视，因为act会有后续影响，其次reward是可能有延迟的。
+
+Ver1。将act之后所有reward求和为G（cummulated reward），将G作为评价
