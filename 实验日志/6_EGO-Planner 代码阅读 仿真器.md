@@ -1,3 +1,6 @@
+---
+date: 2026-01-15
+---
 
 首先在仿真中运行，是通过planner下plan_manage的launch文件进行的
 ![[ego 仿真启动位置.png]]
