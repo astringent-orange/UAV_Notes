@@ -20,4 +20,9 @@ Ver4 在上面的公式中，V是一个平均值，而G是一轮的值，看起�
 
 
 具体而言
-actor-critic网络，其输入的内容都是相同的，但是输出部分不同
+actor-critic网络，其输入的内容都是相同的，但是输出部分不同，于是可以共享一部分网络结构
+
+
+reward shaping
+目前通过actor与env互动得到reward，对于reward整理得到分数A。如果reward几乎都是0，只有少数巨大的reward（sparse reward），例如下围棋只在最终结束时会有reward，甚至如让机械臂打螺丝，在随机时几乎不会有reward。于是想办法提供一些额外的reward，来帮助学习（reward shaping）。
+
