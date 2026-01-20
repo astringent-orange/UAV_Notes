@@ -32,4 +32,14 @@ curiosity - reward shaping：如果机器看到了新东西（有意义）则进
 
 
 No reward
-去定义reward有时都是困难的，一般只在游戏环境中比较好定义
+去定义reward有时都是困难的，一般只在游戏环境中比较好定义。
+
+imitation learning
+虽然仍然有actor与env进行互动，没有reward，但是有expert的环境互动的示范。和监督学习之间有什么区别？监督学习是让机器去“behavior cloning“，这样一是机器不会做出示范以外的行为，但是通常在RL中机器会面对的情况是无法被完全囊括的；二是机器可能会学到一些不相干的行为
+
+inverse RL
+之前的过程，是从reward经过RL去优化actor；现在反过来，expert经过inverse RL去反推reward。其最基本的概念：老师的行为是最好的（并不是完全照搬老师行为）
+具体过程如下：
+初始化一个actor，在每一轮训练中，actor会自己与环境互动收集到一些traj，现在要定义一个reward，让老师得到分数比actor得到的reward更高，从而更新reward fun，然后根据这个reward fun去更新actor。这个结构和GAN很相似。
+
+这种方法常常用于训练机械臂
