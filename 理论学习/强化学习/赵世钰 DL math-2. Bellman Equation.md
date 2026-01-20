@@ -47,5 +47,18 @@ return是对于一条 trajectory所求的，而state value是对于多条traject
 ![[4dd02fd4-71ac-45aa-8d39-c042f8074863.png]]
 相当于把表达式又写回去
 
-然后写为矩阵-向量形式
+然后要写为矩阵-向量形式
+![[d184408c-592d-4256-b768-bcefffc3fccf.png]]
+首先为所有的s赋予编号，然后按照编号排列公式并将转移矩阵展开，示例如下
+![[dce5c957-baf8-4a37-bf07-2c4f916cddad.png]]
 
+# Bellman equation: Solve state value
+给定一个policy，然后找到对应的state value的过程叫做policy evaluation。根据上面的贝尔曼的矩阵向量形式，有两种求解方式。第一种是closed-form
+![[16882c97-0f77-4608-96b9-e58645249d5f.png]]
+虽然形式很好看，但是在实际中，可能并不会使用。因为当状态空间过大时，求逆矩阵将会非常复杂。于是会用第二种，迭代的公式
+![[2b5e6a5a-a906-4037-ad59-5b801a3c3ece.png]]
+其思想在于，贝尔曼方程规定了真实的v pai必须满足这个等式
+![[ff010f5b-7d16-461f-8b1d-567bd4dcfe20.png]]
+而目前不知道真实的v pai，就随意猜测一个v0，然后带入右边等式，然后将算出来的结果设为v1，然后不停地重复这个过程，当k趋于∞时，vk趋于v pai。
+为什么这个方法可行呢？利用高数中数列收敛的原理。当k->∞时，误差趋于0
+![[dbc852ca-df33-41dc-8281-bd6b444b368f.png]]
