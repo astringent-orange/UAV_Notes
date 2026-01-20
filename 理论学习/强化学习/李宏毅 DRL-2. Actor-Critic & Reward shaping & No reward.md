@@ -26,3 +26,10 @@ actor-critic网络，其输入的内容都是相同的，但是输出部分不�
 reward shaping
 目前通过actor与env互动得到reward，对于reward整理得到分数A。如果reward几乎都是0，只有少数巨大的reward（sparse reward），例如下围棋只在最终结束时会有reward，甚至如让机械臂打螺丝，在随机时几乎不会有reward。于是想办法提供一些额外的reward，来帮助学习（reward shaping）。
 
+例如不仅对于一些结果给reward，还可以对一些行为进行reward。可见reward shaping是需要domain knowledge的
+
+curiosity - reward shaping：如果机器看到了新东西（有意义）则进行加分
+
+
+No reward
+去定义reward有时都是困难的，一般只在游戏环境中比较好定义

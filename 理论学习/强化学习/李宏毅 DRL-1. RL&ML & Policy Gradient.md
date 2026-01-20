@@ -1,4 +1,3 @@
-
 不知道正确答案的情况，但是通常知道什么是好和不好
 
 机器学习：找一个 函数，而在强化学习里如何表现？在RL里有一个actor与env，actor从env获得observation，然后输出action，而从ob到action的过程就是这个function。而env会对action给出reward，要找一个fun最大化reward的总和，但是reward并不一定是即时的
