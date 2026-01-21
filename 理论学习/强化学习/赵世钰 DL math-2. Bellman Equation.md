@@ -80,3 +80,5 @@ state value是agent从一个状态出发，可以得到的avg return；action va
 
 # 额外批注
 注意，上面的所有内容都是假设知道环境模型（model-based），且状态有限的。如果要扩展到不知道环境（model-free）则是需要去预测，使用例如MC，TD等方法；而如果状态是无限的，则需要引入神经网络用函数去表示。
+
+而贝尔曼方程，首先是一个方程，是用于求解当 策略 固定，且环境model已知时，从某个状态出发，能获得多少评价（policy evaluation）
