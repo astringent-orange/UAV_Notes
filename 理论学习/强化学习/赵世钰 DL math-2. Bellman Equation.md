@@ -76,3 +76,7 @@ state value是agent从一个状态出发，可以得到的avg return；action va
 ![[d72182ef-ccf9-403c-bac0-19fcd88a0997.png]]
 ![[9756641a-dae1-4a5f-94ec-70d323173f06.png]]
 于是可以知道，如果有所有的action value，求个平均就有state value；如果知道所有的state value 也可以反推出action value
+
+
+# 额外批注
+注意，上面的所有内容都是假设知道环境模型（model-based），且状态有限的。如果要扩展到不知道环境（model-free）则是需要去预测，使用例如MC，TD等方法；而如果状态是无限的，则需要引入神经网络用函数去表示。
