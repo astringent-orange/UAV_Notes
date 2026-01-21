@@ -1,9 +1,9 @@
 
 # 1. Motivating examples
-为什么return重要
-可以说明策略的好坏
+**为什么return重要**
+可以说明策略的好坏；（补充）为什么不直接用reward来评价policy，因为reward是对于一个action的反馈，会造成policy的短视；RL与SL一大区别是RL的决定是对后续有影响的，所以还需要看对未来的结果。而return的演化可以参考李宏毅部分。
 
-如何计算return
+**如何计算return**
 一种是根据定义来计算
 第二种是根据递推来计算，即一个状态的value依赖于其他状态的value
 
@@ -16,7 +16,9 @@
 ![[bf3f2025-e4cb-4a4d-ba6c-5883f1c9c4ec.png]]
 
 **return与state value的区别**
-return是对于一条 trajectory所求的，而state value是对于多条trajectory求的平均
+return是对于一条 trajectory所求的，而state value是对于多条trajectory求的平均；（补充）或者说return需要完成一条traj才能统计，但是有时候在traj完成前需要估计某个state的价值
+
+具体而言，对于一条traj其每一步的a,s,r都是确定的，可以直接计算；但是要求平均（期望值）则不同，因为即使面对同样的情况，policy可能采取不同的行为。此外，这里对于评价做出了更具体的区分：分成state value和action value
 
 
 # 3. Bellman equation: Derivation
@@ -40,6 +42,7 @@ return是对于一条 trajectory所求的，而state value是对于多条traject
 ![[e58a05d6-15c4-4ef3-bc65-f414fb4799c8.png]]
 对于空间中每一个状态s都有该公式成立。其中v(s)与v(s')是想要计算的state value。然后公式中有许多的概率，首先pai(a|s)就是policy；其次另外两个概率是environment model，这里先假设知道这个model。
 
+这里可以理解为模型采取任意动作后，该动作能得到的奖励期望，加上会转移到的状态的state value期望
 
 # 4. Bellman equation: Matrix-vector form
 上面提到了贝尔曼方程对于所有s都是成立的，于是将所有公式写在一起然后进行整理，便可以得到矩阵-向量的形式。首先对于上面的公式进行演化
