@@ -28,6 +28,12 @@
 
 # Use data more efficient
 **Algorithm: MC basic starts**
-MC basic在实际中并不实用，因为效率很低
+MC basic在实际中并不实用，因为效率很低；因此提出了以下两个改进方法
+1. 更高效的数据利用
+![[f5ca8c88-2a87-477d-9404-c2d701ffc27e.png]]
+
+2. 更频繁的策略更新
+
+
 
 # MC without exploring starts
