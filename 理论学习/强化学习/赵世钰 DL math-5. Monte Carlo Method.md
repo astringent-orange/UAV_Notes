@@ -33,11 +33,18 @@
 MC basic在实际中并不实用，因为效率很低；因此提出了以下两个改进方法
 1. 更高效的数据利用
 ![[f5ca8c88-2a87-477d-9404-c2d701ffc27e.png]]
-在MC basic中，从s1做动作a2探索一条路径结果只会更新s1，a2的价值，但是实际上还经过了s2，a4等情况，浪费
+first-visit：在MC basic中，从s1做动作a2探索一条路径结果只会更新s1，a2的价值，但是实际上还经探索过了s2，a4等情况，所以其实可以顺路更新这些情况的价值。
 
+every-visit：所以改进上述方法，当我们探索完一条路径后，倒推更新。例如图中一条从s1到s5的路径，倒推着更新。
 
 2. 更频繁的策略更新
+在MC basic中，计算一个动作的价值，需要实际探索许多次来求平均值，最后才能更新一次策略，这样太慢了。于是可以每探索一次，就将该次的return认为是action的价值，然后更新一次策略。
 
+这样虽然抖动更大，但是仍然能够收敛
 
+综上，将两种方法结合起来，有了MC  basic starts
 
 # MC without exploring starts
+**algorithm: ε-greedy policy**
+如何去掉exploring starts，引入soft policy
+![[12dd75b6-c10e-494b-ae9c-aa219421c36e.png]]
