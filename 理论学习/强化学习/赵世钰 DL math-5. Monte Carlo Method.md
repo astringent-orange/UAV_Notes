@@ -26,11 +26,15 @@
 1. policy evaluation：获取所有的q(s,a)；这里是通过实际数据来求平均
 2. policy improvement：让策略选择最好动作
 
+细节：首先在上面MC过程中，为了获得一个状态s下某个动作a产生的影响，需要走完该路径上所有的状态。当然走完所有状态通常是不现实的，所以设置一个episode值控制走几步，表示往后看几步
+
 # Use data more efficient
 **Algorithm: MC basic starts**
 MC basic在实际中并不实用，因为效率很低；因此提出了以下两个改进方法
 1. 更高效的数据利用
 ![[f5ca8c88-2a87-477d-9404-c2d701ffc27e.png]]
+
+
 
 2. 更频繁的策略更新
 
