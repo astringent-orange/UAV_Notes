@@ -49,10 +49,27 @@ first-visit：第一次经过s1，a2才进行估计
 
 综上，将两种方法结合起来，有了MC  exploring starts
 ![[9012aa2a-57ee-47a3-ad6a-fa6cb9d3f00b.png]]
-这里有一个条件，
+这里有一个条件，选择的起始pair要能尽量访问所有pair；但是实际上这样无法保证所有sa对都能被访问，所以还是要遍历每一个sa对（first visiti）
+此外，每次得到一条episode，都是倒推着从终点去访问并计算return
 
 
 # MC without exploring starts
 **algorithm: ε-greedy policy**
-如何去掉exploring starts，引入soft policy
+如何去掉exploring starts，引入soft policy：对每一个action都有可能去做选择。即将策略更改为随机性的（之前的策略是确定性的，只选择q最大的动作），这样当一个episode很长时，可以确保能访问到所有的sa对
+
+如何实现soft policy呢？这里使用ε-greedy policy
 ![[12dd75b6-c10e-494b-ae9c-aa219421c36e.png]]
+其中ε是0到1的正数，而|A(s)|是action的个数。从而以较大概率选择greedy action，但是其他action也能选择到。其中greedy action的概率比其他任何动作的概率都大
+![[1d7a5d5e-9f7a-4324-af86-323c23a1f66b.png]]
+为什么使用ε-greedy？平衡exploitation和exploration，即又要充分利用已知的高价值行为，又要去探索其他情况。当ε=0，那就变为greedy算法，只会选择已知的最佳行为；当ε=1，则所有行为有同样的概率。
+
+如何与MC算法结合？
+之前两个MC算法的policy improvement部分如下，greedy选择最佳的行为
+![[1449c46b-e779-4097-90b4-34794b2df24a.png]]
+
+现在改进后如下
+![[5ee346d3-4019-4f9b-bca9-0c12715762d7.png]]
+即策略的选择变化了
+
+![[2c285674-b0de-4d97-b069-fba8749cab0c.png]]
+伪代码算法如图，不同之处有从first visit变为every visit；因为现在改变后episode可能会很长，中间可能多次访问同一个sa，first visit可能会浪费数据
