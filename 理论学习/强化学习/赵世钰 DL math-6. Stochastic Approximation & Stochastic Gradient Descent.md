@@ -35,6 +35,14 @@ RM算法如下
 最后，什么样的ak可以满足这两个条件呢？通常一个典型就是ak=1/k。但实际使用时，一般会让ak为一个很小的常数
 ![[0a0a4d20-5c52-44c5-8810-fbc3dc9c6c1c.png]]
 
+回到一开始的mean estimation，当时说当ak满足一些条件时，wk仍然可以收敛到EX；这个算法其实可以看为RM
+![[7a9a27fd-561c-47e2-b345-896565cd7448.png]]
+考虑以下这样一个函数，目标是求g(w)=0，就相当于去求EX
+![[bb2f049c-d918-4f67-bb1f-0c0d31611f57.png]]
+
+
+![[63da20a9-b399-4997-8510-131aa2e53afc.png]]
+
 # Stochastic gradient descent
 
 
