@@ -29,20 +29,28 @@
 细节：首先在上面MC过程中，为了获得一个状态s下某个动作a产生的影响，需要走完该路径上所有的状态。当然走完所有状态通常是不现实的，所以设置一个episode值控制走几步，表示往后看几步
 
 # Use data more efficient
-**Algorithm: MC basic starts**
+**Algorithm: MC exploring starts**
 MC basic在实际中并不实用，因为效率很低；因此提出了以下两个改进方法
 1. 更高效的数据利用
 ![[f5ca8c88-2a87-477d-9404-c2d701ffc27e.png]]
-first-visit：在MC basic中，从s1做动作a2探索一条路径结果只会更新s1，a2的价值，但是实际上还经探索过了s2，a4等情况，所以其实可以顺路更新这些情况的价值。
+initial-visit：在MC basic中，从s1做动作a2探索一条路径结果只会更新s1，a2的价值，但是实际上还经探索过了s2，a4等情况，所以其实可以顺路更新这些情况的价值。其中，将经过一个state action pair称为对其进行了visit。
 
-every-visit：所以改进上述方法，当我们探索完一条路径后，倒推更新。例如图中一条从s1到s5的路径，倒推着更新。
+为了改进上述方法，又有以下两种情况。举例而言如图中，经过了两次s1 a2
+every-visit：每一次经过s1 a2都进行一次估计
+first-visit：第一次经过s1，a2才进行估计
 
 2. 更频繁的策略更新
 在MC basic中，计算一个动作的价值，需要实际探索许多次来求平均值，最后才能更新一次策略，这样太慢了。于是可以每探索一次，就将该次的return认为是action的价值，然后更新一次策略。
 
 这样虽然抖动更大，但是仍然能够收敛
 
-综上，将两种方法结合起来，有了MC  basic starts
+
+这些算法都可以称为General policy iteration GPI
+
+综上，将两种方法结合起来，有了MC  exploring starts
+![[9012aa2a-57ee-47a3-ad6a-fa6cb9d3f00b.png]]
+这里有一个条件，
+
 
 # MC without exploring starts
 **algorithm: ε-greedy policy**
