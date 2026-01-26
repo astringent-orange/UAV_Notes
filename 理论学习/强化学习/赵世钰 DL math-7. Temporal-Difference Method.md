@@ -17,3 +17,9 @@
 ![[c35148a5-5ea0-4153-82c7-90af9de73da5.png]]
 为什么vt bar被称为TD target？因为想要vst朝着vt bar的方向改进
 ![[22126260-11a8-49f0-bbff-9dc7d62b1825.png]]
+两边都减去一个vt bar，这样描述了两个时刻之间，vt与vt bar的差异；取绝对值，可以看到t+1时刻的差异更小了，所以说TD是将v向vt bar的方向推进
+![[1c883f34-c77d-47b0-b53f-8fd751e2ec94.png]]
+
+
+最后总结一下
+TD只是在估计state value；不能估计action value；不能找出最优策略
