@@ -1,5 +1,5 @@
 
-回顾之前的内容，在MC部分第一次介绍了model-free的方法，而TD是第二种，且前者是无增量的后者是增量式的。简单地说，MC即使再快，也至少要“完成”一次实验后才能求得价值期望；而TD是在实验的过程中即可动态更新，这样减少了时间的浪费，加快了收敛的速度。
+回顾之前的内容，在MC部分第一次介绍了model-free的方法，而TD是第二种，且前者是无增量的后者是增量式的。简单地说，MC即使再快，也至少要“完成”一次实验后才能求得价值期望；而TD是在实验的过程中即可动态更新，这样减少了时间的浪费，加快了收敛的速度。TD的名字体现在“用两个时间点预测值的差来指导学习”
 
 # Motivating Example
 第一个例子，在已知一些采样xi的情况下求解EX。可以用RM方法，令g(w)=w-EX，从而有测量值w-x
@@ -68,4 +68,19 @@ TD需要一串experience，由s和r交替构成（或者是三元组的集合）
 接下来介绍Q-learning的一些性质，首先要正式引入两种概念：on/off-policy
 在TD中有两种策略：behavior policy用来与环境交互得到experience的策略，target policy用来改进的策略；当behavior policy与target policy相同时，则称为on-policy，反正则称为off-policy
 
-显然off-policy的好处在于可以用别人的经验去优化策略：例如behavior policy的探索性很强，而target policy是greedy的
+显然off-policy的好处在于可以用别人的经验去优化策略：例如behavior policy的探索性很强，而target policy是greedy的。而MC与sarsa都是on-policy的，Q-learning则是off-policy（可以是）
+
+在Q-learning的过程中，需要的是st,at,rt+1,st+1；而其中st与at是给定的，剩下两者是根据环境而确定的
+![[e955f113-6094-417f-820e-3a95e60fe844.png]]
+
+实际上Q-learning可以是off-policy，其实也可以是on-policy；伪代码与sarsa基本相同
+![[152eb4ea-34e5-4e53-9641-f123f7b6f55e.png]]
+而off-policy版本如下，其中有一个专门的behavior policy，在update value部分相同，而后面的部分则不同，不再用ε-greedy，而是单纯的greedy
+![[29c3e443-fd6e-42f2-b7f0-972419046fa5.png]]
+
+
+# Unified view
+上述所有针对action value的TD算法都可以表示为下面的形式
+![[ee5b58ea-ded9-4509-972f-28afa498b6e4.png]]
+所有的算法都是在qt bar上有区别，从而对于待解决的问题不一样，发现待求解的公式中都qt bar的期望
+![[04fa47da-8d25-4e47-92c0-35455b65ffda.png]]
