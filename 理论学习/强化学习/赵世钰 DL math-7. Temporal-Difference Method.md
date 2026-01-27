@@ -38,5 +38,9 @@ TD需要一串experience，由s和r交替构成（或者是三元组的集合）
 # TD of action value: Sarsa
 在前面的算法中，使用TD估计了state value，但是在PI中还是要通过计算action value然后选择那个最好的action，因而还是需要额外的步骤。而sarsa则可以直接估计action value。
 
-同样，先直接给出算法的公式如下。给定一个策略，然后有一串经验，由状态、动作、奖励构成（比之前多一个奖励）
+同样，先直接给出算法的公式如下。给定一个策略，然后有一串经验，由状态、动作、奖励构成（比之前多一个奖励），或者可以表示为五元组(st,at,rt+1,st+1,at+1)的集合，而sarsa也是这五个元素的首字母缩写
 ![[4f934854-4456-499e-beac-d24845f54eab.png]]
+可以看到公式和之前的TD形式相近，只是将v修改为q
+![[15c19043-0ddf-4385-8cac-cea3ad57c85f.png]]
+
+而将上面的内容与一个policy improvement结合起来，成为一个完整的过程，也称为sarsa。这里选择使用ε-greedy来选择策略。
