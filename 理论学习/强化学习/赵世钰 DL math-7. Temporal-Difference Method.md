@@ -44,3 +44,28 @@ TD需要一串experience，由s和r交替构成（或者是三元组的集合）
 ![[15c19043-0ddf-4385-8cac-cea3ad57c85f.png]]
 
 而将上面的内容与一个policy improvement结合起来，成为一个完整的过程，也称为sarsa。这里选择使用ε-greedy来选择策略。
+
+下面介绍两种Sarsa的变形
+
+## Expected Sarsa
+![[f98d57af-8768-4124-86eb-d0748ab65b90.png]]
+相当于将sarsa中右侧的qt改变为了vt，然后不用使用at+1；但是计算量增大了
+![[a1fef474-eaec-4498-99c3-256ef1f03374.png]]
+
+
+## n-step Sarsa
+可以将sarsa与MC统一在一起
+![[05e757c0-ed52-414d-8eca-1618f1ec7e80.png]]观察action value是怎么求的，可以根据如何对Gt进行分解有不同的理解。sarsa将Gt分解为一个真实reward与对之后的价值估计，而MC则将Gt全部分解为真实的reward。而n-step则是选取了n步真实reward。
+
+而再对数据进行对比，sarsa只需要一个5元组就可以进行计算，而MC则需要所有5元组进行计算（等整个实验结束），而n-step需要n个5元组（初始等n次）进行计算
+
+# TD of optimal action value: Q-learning
+回顾sarsa，是直接估计action value，然后需要与policy improvement结合才能实现一个完整迭代过程。而Q-learning直接估计最佳的action value，而不需要在两个操作之间切换。同样，先给出算法如下
+![[48ff6f47-0c36-4751-b438-40bfc81aff15.png]]
+从结构上说和sarsa是相同的，只是target不同。而Q-learning所求解的数学问题如下，是在求解一个贝尔曼最优方程
+![[4e2a0979-adc4-4707-b2f9-6589a3f6c504.png]]
+
+接下来介绍Q-learning的一些性质，首先要正式引入两种概念：on/off-policy
+在TD中有两种策略：behavior policy用来与环境交互得到experience的策略，target policy用来改进的策略；当behavior policy与target policy相同时，则称为on-policy，反正则称为off-policy
+
+显然off-policy的好处在于可以用别人的经验去优化策略：例如behavior policy的探索性很强，而target policy是greedy的
