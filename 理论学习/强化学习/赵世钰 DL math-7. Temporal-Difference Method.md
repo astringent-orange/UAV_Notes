@@ -32,3 +32,11 @@ TD需要一串experience，由s和r交替构成（或者是三元组的集合）
 ![[b3c7a879-0f24-4af1-b609-b346933732d6.png]]
 其中右侧有一个v pai，需要替换成vt
 
+然后将TD与MC进行比较
+![[272f1bb1-042a-41a8-996b-fd1a369ae2b0.png]]
+
+# TD of action value: Sarsa
+在前面的算法中，使用TD估计了state value，但是在PI中还是要通过计算action value然后选择那个最好的action，因而还是需要额外的步骤。而sarsa则可以直接估计action value。
+
+同样，先直接给出算法的公式如下。给定一个策略，然后有一串经验，由状态、动作、奖励构成（比之前多一个奖励）
+![[4f934854-4456-499e-beac-d24845f54eab.png]]
