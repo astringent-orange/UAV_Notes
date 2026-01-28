@@ -13,3 +13,12 @@ g++ main.cpp lib.cpp -o final
 但是`makefile`也有问题。例如不同平台的文件路径不同，相同的依赖可能在不同的路径中，且每次新加一个文件就需要手动修改`makefile`
 
 于是有了cmake工具，根据电脑环境自动生成`makefile`。相当于多了一个中间层，使用者通过更高层的`CMakeList.txt`去自动生成更底层的makefile。cmake有几大特点：首先会自动寻找依赖，第二可以跨平台使用，第三其通过让顶层cmakelist指挥底层cmakelist可以管理超大项目。
+
+# catkin make
+可以视为cmake的高阶封装版，ROS1自带的编译工具，用于高效地构建众多相互依赖但独立开发的CMake项目。有一个workspace，将ws下视为一个巨大的cmake项目。
+
+缺点在于没有实现包的隔离，会导致变量名冲突，以及修改一个包需要重新检查整个工作空间的依赖关系
+
+
+# catkin build
+由`catkin_tools`提供的更现代的编译工具，需要自己下载。可以实现多个包并行的单独编译，提供单独的build文件夹和日志等，有更好的输出结果展示。
