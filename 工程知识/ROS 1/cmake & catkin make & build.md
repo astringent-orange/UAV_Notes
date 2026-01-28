@@ -21,4 +21,11 @@ g++ main.cpp lib.cpp -o final
 
 
 # catkin build
-由`catkin_tools`提供的更现代的编译工具，需要自己下载。可以实现多个包并行的单独编译，提供单独的build文件夹和日志等，有更好的输出结果展示。
+由`catkin_tools`提供的更现代ROS1的编译工具，需要自己下载。可以实现多个包并行的单独编译，提供单独的build文件夹和日志等，有更好的输出结果展示。
+
+# 扩展
+catkin工具都是ROS1专用的，即仅能用于ROS项目（其他工具无法识别package.xml文件），且只适用于1代。
+
+ROS2则使用`colcon`，在继承了catkin build的并行隔离编译的基础上，还支持多种语言的项目
+
+而其他大型cpp项目，一般可以用`Ninja+CMake`进行编译
