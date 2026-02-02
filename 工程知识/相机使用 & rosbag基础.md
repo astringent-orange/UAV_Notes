@@ -35,10 +35,26 @@ ros转bag脚本[【ROS学习】 rosbag 转化为 mp4 格式视频_.bag文件怎�
 ## 录制视频
 >首先，虽然使用ros进行录制和使用上面SDK进行录制得到的数据格式，都是`bag`，但是两者是有更细微的差距的，还是建议分开对待。
 
-使用`rosbag`命令来进行录制与回放，官方页面[rosbag/Commandline - ROS Wiki](https://wiki.ros.org/rosbag/Commandline)
+使用`rosbag`命令来进行录制与回放
 
+**基本操作**
+`rosbag record <topic_name>`录制指定的话题，生成文件名为时间戳
+`rosbag record -a`代表录制所有话题
+`rosbag record -O <bag_name>`指定输出的文件名（-O或者-o都可以）
 
+`rosbag info <bag_name>`输出bag信息
 
+`rosbag play <bag_name>`播放bag
+
+`<node pkg="rosbag" type="record" name="bag_record" args="/topic1 /topic2"/> `在launch文件中运行
+
+**运行流程**
+首先需要启动roscore与相机（启动相机的roslaunch文件也会自动启动roscore），其次再启动录制。
+
+参考文档
+[ROS 机器人技术 - rosbag 详细使用教程！ - 知乎](https://zhuanlan.zhihu.com/p/151444739)
+[ROS——一文读懂：rosbag-CSDN博客](https://blog.csdn.net/weixin_42905141/article/details/100057323)
+[rosbag/Commandline - ROS Wiki](https://wiki.ros.org/rosbag/Commandline)
 
 
 
