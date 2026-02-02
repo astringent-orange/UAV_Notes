@@ -51,7 +51,11 @@ ros转bag脚本[【ROS学习】 rosbag 转化为 mp4 格式视频_.bag文件怎�
 **运行流程**
 首先需要启动roscore与相机（启动相机的roslaunch文件也会自动启动roscore），其次再启动录制。
 
-参考文档
+**扩展**
+其他类型的数据，可以用`rqt_plot`或者`plotjuggler`等gui来观察
+
+
+**参考文档**
 [ROS 机器人技术 - rosbag 详细使用教程！ - 知乎](https://zhuanlan.zhihu.com/p/151444739)
 [ROS——一文读懂：rosbag-CSDN博客](https://blog.csdn.net/weixin_42905141/article/details/100057323)
 [rosbag/Commandline - ROS Wiki](https://wiki.ros.org/rosbag/Commandline)
