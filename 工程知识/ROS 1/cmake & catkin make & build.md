@@ -21,7 +21,25 @@ g++ main.cpp lib.cpp -o final
 
 
 # catkin build
-由`catkin_tools`提供的更现代ROS1的编译工具，需要自己下载。可以实现多个包并行的单独编译，提供单独的build文件夹和日志等，有更好的输出结果展示。
+由`catkin_tools`提供的更现代ROS1的编译工具，需要自己下载。
+`sudo apt-get install python3-catkin-tools`
+可以实现多个包并行的单独编译，提供单独的build文件夹和日志等，有更好的输出结果展示。
+
+## catkin config
+在使用`catkin init`初始化工作空间后，可以对工作空间进行一些配置，以优化操作
+
+`catkin config --merge-devel`
+合并编译结果的空间。本来catkin build默认每一个功能包都有单独的devel空间，从而可以单独删除某一个包的编译结果，但是这样python的依赖路径可能很深。
+
+`catkin config --cmake-args -DCMAKE_BUILD_TYPE=Release`
+给底层的编译器传递参数。默认模式为debug或空，而`Release`模式会开启编译器优化（-O3），代码运行速度比 Debug 模式快数倍
+
+`catkin config --cmake-args -DCMAKE_CXX_FLAGS=-fdiagnostics-color`
+让编译器输出的错误信息带颜色。
+
+
+**参考文档**
+[catkin config – 配置工作空间 — catkin_tools 0.0.0 文档](https://catkin-tools.readthedocs.io/en/latest/verbs/catkin_config.html)
 
 # 扩展
 catkin工具都是ROS1专用的，即仅能用于ROS项目（其他工具无法识别package.xml文件），且只适用于1代。
