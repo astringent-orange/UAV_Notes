@@ -28,6 +28,8 @@ g++ main.cpp lib.cpp -o final
 ## catkin config
 在使用`catkin init`初始化工作空间后，可以对工作空间进行一些配置，以优化操作
 
+`catkin config --extend /opt/ros/$ROS_DISTRO`
+
 `catkin config --merge-devel`
 合并编译结果的空间。本来catkin build默认每一个功能包都有单独的devel空间，从而可以单独删除某一个包的编译结果，但是这样python的依赖路径可能很深。
 
@@ -36,6 +38,17 @@ g++ main.cpp lib.cpp -o final
 
 `catkin config --cmake-args -DCMAKE_CXX_FLAGS=-fdiagnostics-color`
 让编译器输出的错误信息带颜色。
+
+`catkin config --install`
+安装模式，在编译完成之后会生成一个可执行的二进制包，这样可以直接发送到服务器上并用docker执行，避免了巨大的源码拷贝
+
+`catkin config --blacklist/whitelist bag_name`
+黑/白名单，不编译/只编译某个包
+
+`catkin config -j/--jobs number`
+手动限制并行编译的线程数，默认编译会占满所有资源
+
+
 
 
 **参考文档**
