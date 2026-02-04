@@ -66,3 +66,6 @@ date: 2026-01-20
 **EKF2融合**
 EKF2_AID_MASK=28，EKF2_HDG_MODE=气压计
 此时里程计正常，但是local position的z轴初始在负值（-1.7）
+
+
+launch文件不保证启动顺序
