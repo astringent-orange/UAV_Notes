@@ -183,6 +183,7 @@ int main(int argc, char **argv)
     return 0;
 }
 ```
+然后最好先在仿真环境中运行节点。但要注意，仿真环境中能运行是最低要求，要放到真机运行可能还需要调整参数。
 
 # 测试过程
 ## 阶段一
@@ -208,13 +209,73 @@ int main(int argc, char **argv)
 再次运行，发现里程计正常，且local position的xyz轴都有正常读数，但是z轴初始在负值（-1.7）。需检查HDG_MODE是否还是气压计。
 
 更改为vision后再次运行，发现z轴读数只有厘米级误差，显示正常。但是当多次用一个launch文件启动所有节点时，发现读数有时会发散。查阅后得知，launch文件不保证启动顺序，于是vins可能在摄像头之前启动，导致读数异常。改为用bash脚本启动多个launch文件，每个launch文件最好只负责一个功能，且内部没有先后顺序。
+```bash
+#!/bin/bash
 
+# 1.启动mavros
+echo -e "\e[1;34m[INFO] Activating Mavros...\033[0m"
+roslaunch mavros px4.launch gcs_url:=udp://@192.168.8.50 &
 
+# 检测飞控是否连接
+until rostopic echo /mavros/state -n 1 2>/dev/null | grep -q "connected: True"; do
+    echo -e "\e[1;34m[INFO] Waiting for FCU connection...\e[0m"
+    sleep 1
+done
+echo -e "\e[1;32m[INFO] FCU connected!\e[0m"
 
-里程计数据误差小，但是local position误差大
-减小EKF2_EVP_NOISE，让修正更小
+# 2.启动相机
+echo -e "\e[1;34m[INFO] Starting camera...\e[0m"
+roslaunch vins d435_run.launch &
 
-当目标位置太低（当前高度+0.15）时在起飞之前无人机就会上锁，修改到+0.2后成功起飞
+# 检测相机是否启动
+until rostopic echo /camera/infra1/image_rect_raw -n 1 > /dev/null 2>&1;do
+    echo -e "\e[1;34m[INFO] Waiting for camera stream...\e[0m"
+    sleep 1
+done
+echo -e "\e[1;32m[INFO] Camera stream detected!\e[0m"
+
+# 3.启动vins
+echo -e "\e[1;34m[INFO] Starting VINS-Fusion...\e[0m"
+roslaunch vins vins_run.launch &
+
+# 检测vins是否启动
+until rostopic echo /vins_node/odometry -n 1 > /dev/null 2>&1;do
+    echo -e "\e[1;34m[INFO] Waiting for VINS to initialize...\e[0m"
+    sleep 1
+done
+echo -e "\e[1;32m[INFO] VINS initialized!Odometry is ready\e[0m"
+
+# 4.启动转换节点
+echo -e "\e[1;34m[INFO] Starting transfer node...\e[0m"
+rosrun offb vins2mavros.py &
+
+# 检测转换节点是否启动
+until rostopic echo /mavros/vision_pose/pose -n 1 >/dev/null 2>&1;do
+    echo -e "\e[1;34m[INFO] Waiting for transfer node to publish data...\e[0m"
+    sleep 1
+done
+
+# 5.设置伪原点
+echo -e "\e[1;34m[INFO] Setting origin node\e[0m"
+rosrun offb set_origin.py &
+
+# 6.重启EKF2
+echo -e "\e[1;34m[INFO] Resetting PX4 EKF2 estimator...\e[0m"
+rosservice call /mavros/cmd/command "{command: 241, param1: 1, param2: 0, param3: 0, param4: 0, param5: 0, param6: 0, param7: 0}"
+
+echo -e "\e[1;32m[INFO] All system started,ready to fly!\e[0m"
+
+# 保持脚本不退出
+wait
+```
+
+抱着无人机进行绕圈检查里程计误差。发现里程计数据误差小，但是local position误差大，于是在QGC中减小`EKF2_EVP_NOISE` `EKF2_EVV_NOISE` `EKF2_EVA_NOISE`，让飞控更相信视觉信息。同样将`EKF2_EV_DELAY`也缩小，因为是有线连接，所以可以在20~50ms。
+
+此外，修改`EKF2_MAG_TYPE`=0，`SYS_HAS_MAG`=0，不在室内环境启用磁力计
+
+最后尝试启动offb_node节点，观察到无人机成功切换模式并解锁，但是解锁后没有起飞。发现当目标位置太低（当前高度+0.15）时在起飞之前无人机就会上锁，修改到+0.2后成功起飞并降落。
+
+观察到无人机的水平方向上基本没有位移，且起飞降落非常稳定；而降落时目标点为-0.05稍微有些慢，但是不影响。但是最后切换到`AUTO.LAND`后
 
 
 
