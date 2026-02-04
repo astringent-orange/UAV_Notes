@@ -203,9 +203,13 @@ int main(int argc, char **argv)
 ## 阶段三
 起飞节点尝试切换无人机飞行模型，但是一直是ALTCTL，且查看`/mavros/local_position/pose`发现其中xy恒等于0，然后z轴发散，但是里程计读数正常。于是可知问题出现在飞控的EKF2数据融合。
 
-使用QGC检查EKF2相关参数，发现是EKF2_AID_MASK值为1，选择的是GPS而不是vision。修改EKF2_AID_MASK=28（使用视觉、yaw、imu），EKF2_HDG_MODE=vision（不使用气压计）。
+使用QGC检查EKF2相关参数，发现是EKF2_AID_MASK（使用什么数据进行融合）值为1，选择的是GPS而不是vision。修改EKF2_AID_MASK=28（使用视觉、yaw、imu），EKF2_HDG_MODE（初始位置信息源）=vision（不使用气压计）。
 
-再次运行，发现里程计正常，但是local position的z轴初始在负值（-1.7）
+再次运行，发现里程计正常，且local position的xyz轴都有正常读数，但是z轴初始在负值（-1.7）。需检查HDG_MODE是否还是气压计。
+
+更改为vision后再次运行，发现z轴读数只有厘米级误差，显示正常。但是当多次用一个launch文件启动所有节点时，发现读数有时会发散。查阅后得知，launch文件不保证启动顺序，于是vins可能在摄像头之前启动，导致读数异常。改为用bash脚本启动多个launch文件，每个launch文件最好只负责一个功能，且内部没有先后顺序。
+
+
 
 里程计数据误差小，但是local position误差大
 减小EKF2_EVP_NOISE，让修正更小
@@ -213,4 +217,4 @@ int main(int argc, char **argv)
 当目标位置太低（当前高度+0.15）时在起飞之前无人机就会上锁，修改到+0.2后成功起飞
 
 
-launch文件不保证启动顺序 用bash脚本启动
+
